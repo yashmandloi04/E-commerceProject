@@ -1,6 +1,6 @@
-require('mongoose')
-// .connect('mongodb+srv://mandloiyash04official1:V1diLybWL6p7LsSw@cluster0.4f0if.mongodb.net/')
+require('mongoose') 
 .connect('mongodb://0.0.0.0:27017/Project_Ecomm')
+// .connect('mongodb+srv://mandloiyash04official1:V1diLybWL6p7LsSw@cluster0.4f0if.mongodb.net/')
 .then(()=>{
   console.log('MongoDB connected')
 })

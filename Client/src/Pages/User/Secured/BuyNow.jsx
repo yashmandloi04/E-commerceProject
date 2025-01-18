@@ -10,21 +10,26 @@ import { useDispatch, useSelector } from 'react-redux'
 import MyCartSlice from '../../../Redux/MyCartSlice'
 
 const BuyNow = () => {
-  let myCartProducts = useSelector(state => state.MyCartSlice)
   const dispatch = useDispatch()
   const params = useParams()
   const navigate = useNavigate()
-  let [iniValue, setIniValue] = useState({})
+  let [iniValue, setIniValue] = useState({
+    name: '',
+    email: '',
+    contact: '',
+    address: '',
+    product_id: '',
+    mode: '',
+  })
   let [productDetail, setProductDetail] = useState([])
+  let myCartProducts = useSelector(state => state.MyCartSlice)
   useEffect(() => {
     getUserDetails()
     if (params.proId) {
       getProductDetails()
     }
     else {
-      console.log(myCartProducts)
       setProductDetail(myCartProducts)
-      dispatch(placeOrderHandler(myCartProducts))
     }
   }, [])
   const getUserDetails = async () => {
@@ -33,7 +38,6 @@ const BuyNow = () => {
         Authorization: localStorage.getItem('access-user')
       }
     })
-    console.log(response.data[0])
     let temp = {
       name: response.data[0].name,
       email: response.data[0].email,
@@ -46,18 +50,16 @@ const BuyNow = () => {
   }
   const getProductDetails = async () => {
     let response = await axios.get(`${API_URL}/product/${params.proId}`)
-    console.log(response.data)
     setProductDetail(response.data[0])
   }
   let OrderFrm = useFormik({
     validationSchema: OrderValidation,
     initialValues: iniValue,
     onSubmit: async (FrmData) => {
-      let response = await axios.post(`${API_URL}/order`, FrmData, {
-        headers: {
-          Authorization: localStorage.getItem('access-user')
-        }
-      })
+      if (!params.proId) {
+        FrmData.product_id = await myCartProducts.map(product => product)
+      }
+      dispatch(placeOrderHandler(FrmData))
       if (response.request.status === 200) {
         navigate(`/order-placed/${params.proId}`)
       }
@@ -74,9 +76,13 @@ const BuyNow = () => {
                 <h2>Address and other details.</h2>
               </div>
               <div className="card-body">
-                <div className="my-2">
-                  <input type="hidden" onChange={OrderFrm.handleChange} value={OrderFrm.values.product_id} name='proId' id='proId' className='form-control' />
-                </div>
+                {
+                  params.proId
+                  &&
+                  <div className="my-2">
+                    <input type="hidden" onChange={OrderFrm.handleChange} value={OrderFrm.values.product_id} name='proId' id='proId' className='form-control' />
+                  </div>
+                }
                 <div className="my-2">
                   <label htmlFor="name">Full Name</label>
                   <input type="text" onChange={OrderFrm.handleChange} value={OrderFrm.values.name} name='name' id='name' className='form-control' />
@@ -114,63 +120,32 @@ const BuyNow = () => {
                 </div>
               </div>
             </div>
-            <div className="col-md-6">
-              <div className="card-header p-3 bg-light text-dark rounded">
-                <h2>Product details.</h2>
-              </div>
-              <div className="card-body">
-                <table className='table table-light'>
-                  <tbody>
-                    <tr>
-                      <td>Image</td>
-                      <td className='text-end'><img style={{ width: '100px' }} src={`${API_PATH}/${productDetail.image}`} alt="productDetail Image" /></td>
-                    </tr>
-                    <tr>
-                      <td className='fw-bold'>Title</td>
-                      <td className='text-start'>{productDetail.detail}</td>
-                    </tr>
-                    <tr>
-                      <td className='fw-bold'>Price</td>
-                      <td className='text-end'>{productDetail.price}</td>
-                    </tr>
-                    <tr>
-                      <td className='fw-bold'>Discount</td>
-                      <td className='text-end'>-{(productDetail.discount * productDetail.price) / 100}</td>
-                    </tr>
-                    <tr>
-                      <td className='fw-bold'>Charges</td>
-                      <td className='text-end'>+{200}</td>
-                    </tr>
-                    <tr>
-                      <td className='fw-bold text-decoration-underline'>Total</td>
-                      <td className='text-end'>+{(productDetail.price - ((productDetail.discount * productDetail.price) / 100) + 200)}</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
 
-              {
-                !params.proId 
-                &&
-                productDetail.map(product => {
+            {
+              params.proId
+                ?
+                <div className="col-md-6">
+                  <div className="card-header p-3 bg-light text-dark rounded">
+                    <h2>Product details.</h2>
+                  </div>
                   <div className="card-body">
                     <table className='table table-light'>
                       <tbody>
                         <tr>
                           <td>Image</td>
-                          <td className='text-end'><img style={{ width: '100px' }} src={`${API_PATH}/${product.image}`} alt="Product Image" /></td>
+                          <td className='text-end'><img style={{ width: '100px' }} src={`${API_PATH}/${productDetail.image}`} alt="productDetail Image" /></td>
                         </tr>
                         <tr>
                           <td className='fw-bold'>Title</td>
-                          <td className='text-start'>{product.detail}</td>
+                          <td className='text-start'>{productDetail.detail}</td>
                         </tr>
                         <tr>
                           <td className='fw-bold'>Price</td>
-                          <td className='text-end'>{product.price}</td>
+                          <td className='text-end'>{productDetail.price}</td>
                         </tr>
                         <tr>
                           <td className='fw-bold'>Discount</td>
-                          <td className='text-end'>-{(product.discount * product.price) / 100}</td>
+                          <td className='text-end'>-{(productDetail.discount * productDetail.price) / 100}</td>
                         </tr>
                         <tr>
                           <td className='fw-bold'>Charges</td>
@@ -178,16 +153,74 @@ const BuyNow = () => {
                         </tr>
                         <tr>
                           <td className='fw-bold text-decoration-underline'>Total</td>
-                          <td className='text-end'>+{(product.price - ((product.discount * product.price) / 100) + 200)}</td>
+                          <td className='text-end'>+{(productDetail.price - ((productDetail.discount * productDetail.price) / 100) + 200)}</td>
                         </tr>
                       </tbody>
                     </table>
                   </div>
-                })
-              }
-              <div className="card-footer">
-                <button type='submit' className='px-4 py-2 btn btn-dark text-light'>Place Order</button>
-              </div>
+
+                  {
+                    !params.proId
+                    &&
+                    productDetail.map(product => {
+                      <div className="card-body">
+                        <table className='table table-light'>
+                          <tbody>
+                            <tr>
+                              <td>Image</td>
+                              <td className='text-end'><img style={{ width: '100px' }} src={`${API_PATH}/${product.image}`} alt="Product Image" /></td>
+                            </tr>
+                            <tr>
+                              <td className='fw-bold'>Title</td>
+                              <td className='text-start'>{product.detail}</td>
+                            </tr>
+                            <tr>
+                              <td className='fw-bold'>Price</td>
+                              <td className='text-end'>{product.price}</td>
+                            </tr>
+                            <tr>
+                              <td className='fw-bold'>Discount</td>
+                              <td className='text-end'>-{(product.discount * product.price) / 100}</td>
+                            </tr>
+                            <tr>
+                              <td className='fw-bold'>Charges</td>
+                              <td className='text-end'>+{200}</td>
+                            </tr>
+                            <tr>
+                              <td className='fw-bold text-decoration-underline'>Total</td>
+                              <td className='text-end'>+{(product.price - ((product.discount * product.price) / 100) + 200)}</td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    })
+                  }
+                </div>
+                :
+                <div className="col-md-6">
+                  {
+                    myCartProducts
+                    &&
+                    myCartProducts.map((product, index) => <div key={index} className="row">
+                      <div className="col-md-1">
+                        <p>{index + 1}</p>
+                      </div>
+                      <div className="col-md-3 d-flex justify-content-center align-content-center">
+                        <img className='img-thumbnail' src={`${API_PATH}/${product.image}`} style={{ height: '100px' }} alt="Product Image" />
+                      </div>
+                      <div className="col-md-6">
+                        <p>{product.name}</p>
+                      </div>
+                      <div className="col-md-2">
+                        <p className='mb-0 fs-6 fw-bolder'>₹{(product.price - (product.discount * product.price) / 100)}</p>
+                        <small className='mt-0 text-decoration-line-through fw-light'>₹{product.price}</small>
+                      </div>
+                    </div>)
+                  }
+                </div>
+            }
+            <div>
+              <button type='submit' className='px-4 py-2 btn btn-dark text-light'>Place Order</button>
             </div>
           </div>
         </form>

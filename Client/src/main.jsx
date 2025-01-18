@@ -7,8 +7,8 @@ import { Provider } from 'react-redux'
 import { configureStore, combineReducers } from '@reduxjs/toolkit'
 import UserAuthSlice from './Redux/UserAuthSlice'
 import MyCartSlice from './Redux/MyCartSlice'
-let rootReducer = combineReducers({UserAuthSlice, MyCartSlice})
-const store = configureStore({reducer: rootReducer})
+let rootReducer = combineReducers({ UserAuthSlice, MyCartSlice })
+const store = configureStore({ reducer: rootReducer })
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
@@ -17,5 +17,5 @@ createRoot(document.getElementById('root')).render(
         <App />
       </Provider>
     </BrowserRouter>
-  </StrictMode>,
+  </StrictMode>
 )

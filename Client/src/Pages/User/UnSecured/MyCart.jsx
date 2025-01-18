@@ -29,7 +29,6 @@ const MyCart = () => {
   //   setTotalAmount(tSubPrice - tDiscount + 200)
   // }
   useEffect(() => {
-    console.log('useEffect called')
     setCartList(state)
     // getCartTotal(state)
   }, [])

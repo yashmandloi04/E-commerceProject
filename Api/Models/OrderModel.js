@@ -2,10 +2,10 @@ require('../Config/conn')
 const mongoose = require('mongoose')
 
 const OrderSchema = mongoose.Schema({
-  product_id:{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'product',
-  },
+  product_id: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'product',
+    },
   user_id:{
     type: mongoose.Schema.Types.ObjectId,
     ref: 'user',

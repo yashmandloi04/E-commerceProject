@@ -3,15 +3,17 @@ import axios from "axios";
 import { API_URL } from "../Helpers/Path";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 
-const placeOrderHandler = createAsyncThunk('placeOrder', async (curState) => {
-  console.log(curState)
-  let response = await axios.post(`${API_URL}/order`, curState, {
+const placeOrderHandler = createAsyncThunk('placeOrder', async (cart) => {
+  console.log(cart)
+  let response = await axios.post(`${API_URL}/order`, cart, {
     headers: {
       Authorization: localStorage.getItem('access-user')
     }
   })
-  return response.request.status
+  if(response.request.status == 200)
+    return cart
 })
+
 const MyCartSlice = createSlice({
   name: 'MyCart',
   initialState: [],
@@ -24,9 +26,8 @@ const MyCartSlice = createSlice({
     },
   },
   extraReducers: (builder) => {
-    builder.addCase(placeOrderHandler.fulfilled, (curState, status) => {
-      if (status === 200)
-        return []
+    builder.addCase(placeOrderHandler.fulfilled, (curState, action) => {
+      
     })
   }
 })

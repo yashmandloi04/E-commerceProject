@@ -48,6 +48,7 @@ const AllRoute = () => {
         <Route path='' element={<UserProtectedModule />}>
           <Route path='buynow' element={<BuyNow />} />
           <Route path='buynow/:proId' element={<BuyNow />} />
+          <Route path='order-placed' element={<OrderSuccess />} />
           <Route path='order-placed/:proId' element={<OrderSuccess />} />
           <Route path='your-orders' element={<YourOrders />} />
           <Route path='profile'>
