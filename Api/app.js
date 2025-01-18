@@ -4,6 +4,11 @@ const cors = require('cors')
 const fileUpload = require('express-fileupload')
 const port = process.env.PORT || 5500
 
+// --------------Live Server---------------------
+const root = require('path').join(__dirname, 'dist')
+app.use(express.static(root));
+// --------------Live Server---------------------
+
 app.use(express.static(__dirname + '/assets'))
 app.use(fileUpload())
 app.use(cors())
@@ -11,6 +16,12 @@ app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 
 app.use('/', require('./AllRoutes/AllRoute'))
+
+// --------------Live Server---------------------
+app.get('*', (req, res)=>{
+  res.sendFile('index.html', {root})
+})
+// --------------Live Server---------------------
 
 app.listen(port, () => {
   console.log('Server running at port ', port)
